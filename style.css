@@ -1,7 +1,7 @@
 /* ========== CSS VARIABLES ========== */
 :root {
-  --bg: #1a0e35;
-  --bg2: #240f4a;
+  --bg: #2d1b5e;
+  --bg2: #3a2275;
   --accent1: #bf7fff;
   --accent2: #7b2ff7;
   --text: #e8eaf6;
@@ -454,7 +454,7 @@ footer {
   to   { opacity: 1; }
 }
 .modal-content {
-  background: #1e0f3a;
+  background: #2a1858;
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 2.5rem;
