@@ -1,8 +1,8 @@
 /* ========== CSS VARIABLES ========== */
 :root {
-  --bg: #0a0a0f;
-  --bg2: #0f0f1a;
-  --accent1: #00d4ff;
+  --bg: #1a0e35;
+  --bg2: #240f4a;
+  --accent1: #bf7fff;
   --accent2: #7b2ff7;
   --text: #e8eaf6;
   --text-muted: #8892a4;
@@ -29,8 +29,9 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(123, 47, 247, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(0, 212, 255, 0.10) 0%, transparent 60%);
+    radial-gradient(ellipse at 20% 50%, rgba(123, 47, 247, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(191, 127, 255, 0.20) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 80%, rgba(100, 20, 200, 0.25) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -453,7 +454,7 @@ footer {
   to   { opacity: 1; }
 }
 .modal-content {
-  background: #12121f;
+  background: #1e0f3a;
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 2.5rem;
