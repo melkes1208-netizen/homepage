@@ -1,13 +1,13 @@
 /* ========== CSS VARIABLES ========== */
 :root {
-  --bg: #4a2d8a;
-  --bg2: #5c3aa0;
-  --accent1: #bf7fff;
-  --accent2: #7b2ff7;
-  --text: #e8eaf6;
-  --text-muted: #8892a4;
-  --card-bg: rgba(255, 255, 255, 0.04);
-  --border: rgba(255, 255, 255, 0.08);
+  --bg: #ffd700;
+  --bg2: #ffec6e;
+  --accent1: #ff6b00;
+  --accent2: #d4a000;
+  --text: #1a1a1a;
+  --text-muted: #555533;
+  --card-bg: rgba(0, 0, 0, 0.06);
+  --border: rgba(0, 0, 0, 0.12);
   --font: 'Outfit', sans-serif;
 }
 
@@ -29,9 +29,9 @@ body {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(123, 47, 247, 0.35) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 20%, rgba(191, 127, 255, 0.20) 0%, transparent 60%),
-    radial-gradient(ellipse at 50% 80%, rgba(100, 20, 200, 0.25) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(255, 180, 0, 0.4) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(255, 220, 0, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 80%, rgba(255, 150, 0, 0.25) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -454,7 +454,7 @@ footer {
   to   { opacity: 1; }
 }
 .modal-content {
-  background: #3d2478;
+  background: #ffe44d;
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 2.5rem;
