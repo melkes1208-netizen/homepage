@@ -65,23 +65,34 @@ body {
 .ambient-bg::before {
   content: '';
   position: absolute;
-  width: 900px;
-  height: 900px;
-  top: -300px;
-  left: -200px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.13) 0%, transparent 70%);
+  width: 1000px;
+  height: 1000px;
+  top: -350px;
+  left: -250px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, transparent 65%);
   animation: driftA 22s ease-in-out infinite;
 }
 
 .ambient-bg::after {
   content: '';
   position: absolute;
-  width: 700px;
-  height: 700px;
-  bottom: -150px;
-  right: -150px;
-  background: radial-gradient(circle, rgba(217, 70, 239, 0.10) 0%, transparent 70%);
+  width: 800px;
+  height: 800px;
+  bottom: -200px;
+  right: -200px;
+  background: radial-gradient(circle, rgba(217, 70, 239, 0.18) 0%, transparent 65%);
   animation: driftB 28s ease-in-out infinite;
+}
+
+/* 중앙 보조 오브 */
+.ambient-bg > div {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  top: 40%;
+  left: 55%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+  animation: driftA 18s ease-in-out infinite reverse;
 }
 
 @keyframes driftA {
@@ -263,11 +274,18 @@ nav.scrolled {
 }
 
 .hero h1 span {
-  background: var(--grad-primary);
+  background: linear-gradient(135deg, #818cf8, #a78bfa, #e879f9, #818cf8);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 32px rgba(139, 92, 246, 0.45));
+  animation: shimmerText 4s linear infinite;
+  filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.55));
+}
+
+@keyframes shimmerText {
+  0%   { background-position: 0% center; }
+  100% { background-position: 200% center; }
 }
 
 .hero p {
@@ -314,8 +332,8 @@ nav.scrolled {
 }
 
 .btn-glow:hover {
-  transform: translateY(-3px) scale(1.03);
-  box-shadow: 0 16px 48px rgba(99, 102, 241, 0.65);
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 20px 56px rgba(99, 102, 241, 0.7), 0 0 80px rgba(217, 70, 239, 0.2);
 }
 
 .btn-glow:hover::before { opacity: 1; }
@@ -507,10 +525,10 @@ section {
 }
 
 .card:hover {
-  border-color: rgba(139, 92, 246, 0.25);
-  background: rgba(139, 92, 246, 0.04);
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-card), 0 0 0 1px rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.06);
+  transform: translateY(-10px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.12), 0 0 40px rgba(99,102,241,0.1);
 }
 
 .card:hover::after { opacity: 1; }
