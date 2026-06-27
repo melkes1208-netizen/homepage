@@ -597,18 +597,13 @@ function App() {
   const [lang, setLang] = useState("ko");
   const [modal, setModal] = useState(false);
 
-  // Scroll reveal observer
   useEffect(() => {
     const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) e.target.classList.add('visible');
-      });
-    }, {
-      threshold: 0.1
-    });
-    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal, .stat-item, .partner-logo').forEach(el => obs.observe(el));
     return () => obs.disconnect();
-  });
+  }, []);
   return /*#__PURE__*/React.createElement("div", {
     className: "app-container"
   }, /*#__PURE__*/React.createElement("div", {
