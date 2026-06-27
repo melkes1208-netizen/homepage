@@ -675,6 +675,41 @@
     100%{transform:scaleY(0);transform-origin:bottom;opacity:0}
   }
 
+  /* ── NAV LOGIN / MEMBER ── */
+  .nav-login {
+    background: transparent; color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,.14);
+    padding: .6rem 1.2rem; border-radius: 100px;
+    font-size: .84rem; font-weight: 600; font-family: var(--font);
+    cursor: pointer; transition: all .3s var(--ease);
+  }
+  .nav-login:hover { border-color: rgba(124,58,237,.45); color: var(--text); background: rgba(124,58,237,.1); }
+  .nav-user-btn {
+    display: flex; align-items: center; gap: .5rem;
+    background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.3);
+    padding: .5rem 1.1rem; border-radius: 100px;
+    font-size: .84rem; font-weight: 600; font-family: var(--font);
+    color: var(--violet-l); cursor: pointer; transition: all .3s;
+  }
+  .nav-user-btn:hover { background: rgba(124,58,237,.22); }
+
+  /* ── MODAL SWITCH LINK ── */
+  .modal-switch { text-align: center; font-size: .8rem; color: var(--muted); margin-top: .85rem; }
+  .modal-switch a { color: var(--violet-l); cursor: pointer; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+  .modal-switch a:hover { color: var(--cyan); }
+
+  /* ── LOGIN ERROR ── */
+  .form-err { color: #f87171; font-size: .78rem; text-align: center; margin-bottom: .75rem; display: none; }
+
+  /* ── PROFILE MODAL ── */
+  .profile-rows { display: flex; flex-direction: column; gap: .75rem; }
+  .profile-row {
+    background: rgba(124,58,237,.06); border: 1px solid rgba(124,58,237,.12);
+    border-radius: 12px; padding: .85rem 1.1rem;
+  }
+  .profile-row-lbl { font-size: .68rem; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: .3rem; }
+  .profile-row-val { font-size: .95rem; font-weight: 600; }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 1024px) {
     #navbar, #navbar.scrolled { padding-left: 2.5rem; padding-right: 2.5rem; }
@@ -729,7 +764,16 @@
       <option value="zh">🇨🇳 ZH</option>
       <option value="ja">🇯🇵 JP</option>
     </select>
-    <button class="nav-cta" data-i18n="nav-cta" onclick="openModal()">지금 시작하기</button>
+    <!-- 비로그인 상태 -->
+    <div id="navGuest" style="display:flex;gap:.65rem;align-items:center;">
+      <button class="nav-login" data-i18n="nav-login" onclick="openLoginModal()">로그인</button>
+      <button class="nav-cta" data-i18n="nav-cta" onclick="openModal()">지금 시작하기</button>
+    </div>
+    <!-- 로그인 상태 -->
+    <div id="navMember" style="display:none;gap:.65rem;align-items:center;">
+      <button class="nav-user-btn" onclick="openProfile()">👤 <span id="navUserName"></span></button>
+      <button class="nav-login" data-i18n="nav-logout" onclick="doMemberLogout()">로그아웃</button>
+    </div>
   </div>
 </nav>
 
@@ -1057,6 +1101,47 @@
     <p class="pwd-guide" data-i18n="pwd-guide">비밀번호는 7~16자리 영문, 숫자, 특수문자를 포함해야 합니다.</p>
     <button class="btn-full primary" data-i18n="modal-signup-btn" onclick="handleSignup()">이메일로 가입하기</button>
     <button class="btn-full secondary" data-i18n="modal-guest-btn" onclick="handleGuest()">게스트로 둘러보기</button>
+    <p class="modal-switch" data-i18n="signup-to-login">이미 계정이 있으신가요? <a onclick="switchToLogin()">로그인</a></p>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="loginModal" onclick="handleLoginOverlay(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeLoginModal()">×</button>
+    <h2 class="modal-title" data-i18n="login-title">로그인</h2>
+    <p class="form-err" id="loginErrMsg" data-i18n-err="a-login-fail"></p>
+    <div class="form-group">
+      <input type="email" id="lemail" data-i18n-ph="login-email-ph" placeholder="이메일 주소">
+    </div>
+    <div class="form-group">
+      <input type="password" id="lpwd" data-i18n-ph="login-pwd-ph" placeholder="비밀번호" onkeydown="if(event.key==='Enter')handleLogin()">
+    </div>
+    <button class="btn-full primary" data-i18n="login-btn" onclick="handleLogin()">로그인</button>
+    <p class="modal-switch" data-i18n="login-to-signup">계정이 없으신가요? <a onclick="switchToSignup()">회원가입</a></p>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="handleProfileOverlay(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeProfile()">×</button>
+    <h2 class="modal-title" data-i18n="profile-title">내 정보</h2>
+    <div class="profile-rows">
+      <div class="profile-row">
+        <div class="profile-row-lbl" data-i18n="profile-name-lbl">이름</div>
+        <div class="profile-row-val" id="profileName"></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-row-lbl" data-i18n="profile-email-lbl">이메일</div>
+        <div class="profile-row-val" id="profileEmail"></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-row-lbl" data-i18n="profile-date-lbl">가입일</div>
+        <div class="profile-row-val" id="profileDate"></div>
+      </div>
+    </div>
+    <button class="btn-full secondary" style="margin-top:1.5rem" data-i18n="profile-close" onclick="closeProfile()">닫기</button>
   </div>
 </div>
 
@@ -1064,7 +1149,7 @@
   /* ── TRANSLATIONS ── */
   const T = {
     ko: {
-      'nav-platform':'플랫폼','nav-roadmap':'로드맵','nav-partners':'파트너','nav-contact':'문의','nav-cta':'지금 시작하기',
+      'nav-platform':'플랫폼','nav-roadmap':'로드맵','nav-partners':'파트너','nav-contact':'문의','nav-cta':'지금 시작하기','nav-login':'로그인','nav-logout':'로그아웃',
       'hero-badge':'Web3 차세대 플랫폼',
       'hero-h1':'미래 금융의 시작,\n      <span class="gradient-word">ZETASUM</span>',
       'hero-desc':'광고 시청 보상과 Web3 금융 생태계를 연결하는 차세대 글로벌 플랫폼. 지금 제타섬과 함께 새로운 경제를 경험하세요.',
@@ -1098,9 +1183,15 @@
       'modal-title':'회원가입','modal-fname':'이름','modal-email':'이메일 주소','modal-pwd':'비밀번호','modal-pwd2':'비밀번호 확인',
       'pwd-guide':'비밀번호는 7~16자리 영문, 숫자, 특수문자를 포함해야 합니다.',
       'modal-signup-btn':'이메일로 가입하기','modal-guest-btn':'게스트로 둘러보기',
+      'signup-to-login':'이미 계정이 있으신가요? <a onclick="switchToLogin()">로그인</a>',
+      'login-title':'로그인','login-email-ph':'이메일 주소','login-pwd-ph':'비밀번호','login-btn':'로그인',
+      'login-to-signup':'계정이 없으신가요? <a onclick="switchToSignup()">회원가입</a>',
+      'profile-title':'내 정보','profile-name-lbl':'이름','profile-email-lbl':'이메일','profile-date-lbl':'가입일','profile-close':'닫기',
       'a-fill':'모든 정보를 입력해주세요.','a-mismatch':'비밀번호가 서로 일치하지 않습니다.','a-invalid':'비밀번호 형식이 올바르지 않습니다.',
-      'a-done':'회원가입이 완료되었습니다!','a-guest':'게스트 모드로 입장합니다.',
+      'a-done':'회원가입이 완료되었습니다! 자동으로 로그인됩니다.','a-guest':'게스트 모드로 입장합니다.',
       'a-subscribe':'구독이 완료되었습니다!','a-email-empty':'이메일 주소를 입력해주세요.',
+      'a-dup-email':'이미 가입된 이메일 주소입니다.','a-login-fail':'이메일 또는 비밀번호가 올바르지 않습니다.',
+      'a-logout':'로그아웃되었습니다.',
     },
     en: {
       'nav-platform':'Platform','nav-roadmap':'Roadmap','nav-partners':'Partners','nav-contact':'Contact','nav-cta':'Get Started',
@@ -1137,9 +1228,15 @@
       'modal-title':'Sign Up','modal-fname':'Full Name','modal-email':'Email Address','modal-pwd':'Password','modal-pwd2':'Confirm Password',
       'pwd-guide':'Password must be 7–16 characters including letters, numbers, and special characters.',
       'modal-signup-btn':'Sign Up with Email','modal-guest-btn':'Browse as Guest',
+      'signup-to-login':'Already have an account? <a onclick="switchToLogin()">Sign in</a>',
+      'login-title':'Sign In','login-email-ph':'Email Address','login-pwd-ph':'Password','login-btn':'Sign In',
+      'login-to-signup':"Don't have an account? <a onclick=\"switchToSignup()\">Sign up</a>",
+      'profile-title':'My Profile','profile-name-lbl':'Name','profile-email-lbl':'Email','profile-date-lbl':'Join Date','profile-close':'Close',
       'a-fill':'Please fill in all fields.','a-mismatch':'Passwords do not match.','a-invalid':'Invalid password format.',
-      'a-done':'Registration complete!','a-guest':'Entering as guest.',
+      'a-done':'Registration complete! Logging you in...','a-guest':'Entering as guest.',
       'a-subscribe':'Subscription complete!','a-email-empty':'Please enter your email address.',
+      'a-dup-email':'This email is already registered.','a-login-fail':'Invalid email or password.',
+      'a-logout':'You have been logged out.',
     },
     zh: {
       'nav-platform':'平台','nav-roadmap':'路线图','nav-partners':'合作伙伴','nav-contact':'联系我们','nav-cta':'立即开始',
@@ -1176,9 +1273,15 @@
       'modal-title':'注册','modal-fname':'姓名','modal-email':'电子邮件地址','modal-pwd':'密码','modal-pwd2':'确认密码',
       'pwd-guide':'密码须为7~16位，包含英文字母、数字和特殊字符。',
       'modal-signup-btn':'通过邮件注册','modal-guest-btn':'以访客身份浏览',
+      'signup-to-login':'已有账号？<a onclick="switchToLogin()">登录</a>',
+      'login-title':'登录','login-email-ph':'电子邮件地址','login-pwd-ph':'密码','login-btn':'登录',
+      'login-to-signup':'没有账号？<a onclick="switchToSignup()">注册</a>',
+      'profile-title':'我的信息','profile-name-lbl':'姓名','profile-email-lbl':'邮箱','profile-date-lbl':'注册日期','profile-close':'关闭',
       'a-fill':'请填写所有信息。','a-mismatch':'两次密码不一致。','a-invalid':'密码格式不正确。',
-      'a-done':'注册完成！','a-guest':'以访客模式进入。',
+      'a-done':'注册完成！自动登录中...','a-guest':'以访客模式进入。',
       'a-subscribe':'订阅成功！','a-email-empty':'请输入您的电子邮件地址。',
+      'a-dup-email':'该邮箱已注册。','a-login-fail':'邮箱或密码不正确。',
+      'a-logout':'已退出登录。',
     },
     ja: {
       'nav-platform':'プラットフォーム','nav-roadmap':'ロードマップ','nav-partners':'パートナー','nav-contact':'お問い合わせ','nav-cta':'今すぐ始める',
@@ -1215,9 +1318,15 @@
       'modal-title':'会員登録','modal-fname':'お名前','modal-email':'メールアドレス','modal-pwd':'パスワード','modal-pwd2':'パスワード確認',
       'pwd-guide':'パスワードは7~16文字の英字・数字・特殊文字を含める必要があります。',
       'modal-signup-btn':'メールで登録','modal-guest-btn':'ゲストとして見る',
+      'signup-to-login':'すでにアカウントをお持ちの方は<a onclick="switchToLogin()">ログイン</a>',
+      'login-title':'ログイン','login-email-ph':'メールアドレス','login-pwd-ph':'パスワード','login-btn':'ログイン',
+      'login-to-signup':'アカウント未登録の方は<a onclick="switchToSignup()">新規登録</a>',
+      'profile-title':'マイプロフィール','profile-name-lbl':'名前','profile-email-lbl':'メール','profile-date-lbl':'登録日','profile-close':'閉じる',
       'a-fill':'すべての情報を入力してください。','a-mismatch':'パスワードが一致しません。','a-invalid':'パスワードの形式が正しくありません。',
-      'a-done':'会員登録が完了しました！','a-guest':'ゲストモードで入場します。',
+      'a-done':'会員登録が完了しました！自動ログインします。','a-guest':'ゲストモードで入場します。',
       'a-subscribe':'購読が完了しました！','a-email-empty':'メールアドレスを入力してください。',
+      'a-dup-email':'このメールアドレスはすでに登録されています。','a-login-fail':'メールアドレスまたはパスワードが正しくありません。',
+      'a-logout':'ログアウトしました。',
     },
   };
 
@@ -1236,6 +1345,78 @@
       if (d[k] !== undefined) el.placeholder = d[k];
     });
   }
+
+  /* ── SESSION ── */
+  function checkSession() {
+    const s = sessionStorage.getItem('zetasum_session');
+    if (s) updateNavForMember(JSON.parse(s).name);
+  }
+  function updateNavForMember(name) {
+    document.getElementById('navGuest').style.display  = 'none';
+    document.getElementById('navMember').style.display = 'flex';
+    document.getElementById('navUserName').textContent = name;
+  }
+  function restoreNavGuest() {
+    document.getElementById('navGuest').style.display  = 'flex';
+    document.getElementById('navMember').style.display = 'none';
+  }
+
+  /* ── LOGIN MODAL ── */
+  function openLoginModal() {
+    document.getElementById('lemail').value = '';
+    document.getElementById('lpwd').value = '';
+    document.getElementById('loginErrMsg').style.display = 'none';
+    document.getElementById('loginModal').classList.add('open');
+  }
+  function closeLoginModal() { document.getElementById('loginModal').classList.remove('open'); }
+  function handleLoginOverlay(e) { if (e.target === document.getElementById('loginModal')) closeLoginModal(); }
+
+  function handleLogin() {
+    const d     = T[currentLang];
+    const email = document.getElementById('lemail').value.trim();
+    const pwd   = document.getElementById('lpwd').value;
+    const errEl = document.getElementById('loginErrMsg');
+    const users = JSON.parse(localStorage.getItem('zetasum_users') || '[]');
+    const user  = users.find(u => u.email === email && u.pwd === pwd);
+    if (!user) {
+      errEl.textContent = d['a-login-fail'];
+      errEl.style.display = 'block'; return;
+    }
+    sessionStorage.setItem('zetasum_session', JSON.stringify({ name: user.name, email: user.email }));
+    updateNavForMember(user.name);
+    closeLoginModal();
+  }
+
+  function doMemberLogout() {
+    sessionStorage.removeItem('zetasum_session');
+    restoreNavGuest();
+  }
+
+  /* ── SWITCH MODALS ── */
+  function switchToLogin()   { closeModal(); openLoginModal(); }
+  function switchToSignup()  { closeLoginModal(); openModal(); }
+
+  /* ── PROFILE MODAL ── */
+  function openProfile() {
+    const s = sessionStorage.getItem('zetasum_session');
+    if (!s) return;
+    const { name, email } = JSON.parse(s);
+    document.getElementById('profileName').textContent  = name;
+    document.getElementById('profileEmail').textContent = email;
+    const users = JSON.parse(localStorage.getItem('zetasum_users') || '[]');
+    const user  = users.find(u => u.email === email);
+    if (user) {
+      const d = new Date(user.date);
+      document.getElementById('profileDate').textContent =
+        `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+    }
+    document.getElementById('profileModal').classList.add('open');
+  }
+  function closeProfile() { document.getElementById('profileModal').classList.remove('open'); }
+  function handleProfileOverlay(e) { if (e.target === document.getElementById('profileModal')) closeProfile(); }
+
+  /* Session restore on load */
+  checkSession();
 
   /* Navbar scroll */
   window.addEventListener('scroll', () => {
@@ -1266,14 +1447,14 @@
       alert(d['a-invalid']); return;
     }
     const users = JSON.parse(localStorage.getItem('zetasum_users') || '[]');
-    users.push({ name, email, date: new Date().toISOString() });
+    if (users.some(u => u.email === email)) { alert(d['a-dup-email']); return; }
+    users.push({ name, email, pwd, date: new Date().toISOString() });
     localStorage.setItem('zetasum_users', JSON.stringify(users));
     alert(d['a-done']);
     closeModal();
-    document.getElementById('fname').value = '';
-    document.getElementById('femail').value = '';
-    document.getElementById('fpwd').value = '';
-    document.getElementById('fpwd2').value = '';
+    ['fname','femail','fpwd','fpwd2'].forEach(id => document.getElementById(id).value = '');
+    sessionStorage.setItem('zetasum_session', JSON.stringify({ name, email }));
+    updateNavForMember(name);
   }
   function handleGuest() { alert(T[currentLang]['a-guest']); closeModal(); }
 
