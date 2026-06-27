@@ -205,6 +205,64 @@
   .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: .4; }
   .empty p { font-size: .9rem; }
 
+  /* ── PWD MODAL ── */
+  .pwd-modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(0,0,0,.8); backdrop-filter: blur(16px);
+    display: none; align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  .pwd-modal-overlay.open { display: flex; animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .pwd-modal {
+    background: #07080f; border: 1px solid rgba(124,58,237,.3);
+    border-radius: 22px; padding: 2.25rem 2.5rem;
+    width: 100%; max-width: 400px; position: relative;
+    box-shadow: 0 40px 80px rgba(0,0,0,.7);
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .pwd-modal::before {
+    content:''; position:absolute; top:0; left:20%; right:20%; height:1px;
+    background: linear-gradient(90deg,#6d28d9,#0891b2);
+  }
+  .pwd-modal h3 {
+    font-size: 1.15rem; font-weight: 800; margin-bottom: 1.5rem;
+    background: var(--grad-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .pwd-modal label { display:block; font-size:.75rem; color:var(--muted); margin-bottom:.4rem; letter-spacing:.5px; }
+  .pwd-modal input {
+    width:100%; background:rgba(124,58,237,.06);
+    border:1px solid rgba(255,255,255,.09); color:var(--text);
+    padding:.8rem 1rem; border-radius:10px;
+    font-family:var(--font); font-size:.88rem; outline:none;
+    transition:all .2s; margin-bottom:1rem;
+  }
+  .pwd-modal input:focus { border-color:rgba(124,58,237,.55); box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+  .pwd-modal input::placeholder { color:rgba(100,116,139,.5); }
+  .pwd-modal-btns { display:flex; gap:.65rem; margin-top:.5rem; }
+  .btn-confirm {
+    flex:1; padding:.8rem; background:var(--grad); color:#fff; border:none;
+    border-radius:10px; font-size:.88rem; font-weight:700; font-family:var(--font);
+    cursor:pointer; transition:all .25s;
+  }
+  .btn-confirm:hover { filter:brightness(1.15); }
+  .btn-cancel {
+    flex:1; padding:.8rem; background:rgba(255,255,255,.04); color:var(--muted);
+    border:1px solid var(--border); border-radius:10px;
+    font-size:.88rem; font-family:var(--font); cursor:pointer; transition:all .2s;
+  }
+  .btn-cancel:hover { color:var(--text); }
+  .pwd-msg { font-size:.78rem; margin-top:.75rem; text-align:center; min-height:1.1rem; }
+  .pwd-msg.err  { color:#f87171; }
+  .pwd-msg.ok   { color:var(--green); }
+  .pwd-modal-close {
+    position:absolute; top:1rem; right:1.25rem;
+    background:none; border:none; color:var(--muted);
+    font-size:1.1rem; cursor:pointer; transition:color .2s;
+  }
+  .pwd-modal-close:hover { color:var(--text); }
+
   @media (max-width: 768px) {
     header { padding: 1rem 1.5rem; }
     .main { padding: 1.5rem 1rem; }
@@ -233,8 +291,30 @@
     <div>
       <span class="admin-logo">ZETASUM<span>ADMIN</span></span>
     </div>
-    <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    <div style="display:flex;gap:.65rem;align-items:center;">
+      <button class="btn-logout" onclick="openPwdModal()">🔑 비밀번호 변경</button>
+      <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+    </div>
   </header>
+
+  <!-- PWD CHANGE MODAL -->
+  <div class="pwd-modal-overlay" id="pwdModal">
+    <div class="pwd-modal">
+      <button class="pwd-modal-close" onclick="closePwdModal()">×</button>
+      <h3>비밀번호 변경</h3>
+      <label>현재 비밀번호</label>
+      <input type="password" id="curPwd" placeholder="현재 비밀번호">
+      <label>새 비밀번호</label>
+      <input type="password" id="newPwd" placeholder="새 비밀번호 (4자리 이상)">
+      <label>새 비밀번호 확인</label>
+      <input type="password" id="newPwd2" placeholder="새 비밀번호 재입력" onkeydown="if(event.key==='Enter')confirmPwdChange()">
+      <div class="pwd-modal-btns">
+        <button class="btn-confirm" onclick="confirmPwdChange()">변경 완료</button>
+        <button class="btn-cancel" onclick="closePwdModal()">취소</button>
+      </div>
+      <p class="pwd-msg" id="pwdMsg"></p>
+    </div>
+  </div>
 
   <div class="main">
     <!-- STAT CARDS -->
@@ -294,12 +374,17 @@
 </div>
 
 <script>
-  const ADMIN_PWD = 'zetasum2026';
   const STORAGE_KEY = 'zetasum_users';
+  const PWD_KEY     = 'zetasum_admin_pwd';
+  const DEFAULT_PWD = 'zetasum2026';
+
+  function getAdminPwd() {
+    return localStorage.getItem(PWD_KEY) || DEFAULT_PWD;
+  }
 
   function doLogin() {
     const v = document.getElementById('pwdInput').value;
-    if (v === ADMIN_PWD) {
+    if (v === getAdminPwd()) {
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('adminPanel').style.display = 'block';
       renderAll();
@@ -313,6 +398,37 @@
     document.getElementById('adminPanel').style.display = 'none';
     document.getElementById('pwdInput').value = '';
     document.getElementById('loginErr').style.display = 'none';
+  }
+
+  /* ── PASSWORD CHANGE ── */
+  function openPwdModal() {
+    document.getElementById('curPwd').value = '';
+    document.getElementById('newPwd').value = '';
+    document.getElementById('newPwd2').value = '';
+    document.getElementById('pwdMsg').textContent = '';
+    document.getElementById('pwdMsg').className = 'pwd-msg';
+    document.getElementById('pwdModal').classList.add('open');
+  }
+  function closePwdModal() {
+    document.getElementById('pwdModal').classList.remove('open');
+  }
+  function confirmPwdChange() {
+    const cur  = document.getElementById('curPwd').value;
+    const nw   = document.getElementById('newPwd').value;
+    const nw2  = document.getElementById('newPwd2').value;
+    const msg  = document.getElementById('pwdMsg');
+    if (cur !== getAdminPwd()) {
+      msg.textContent = '현재 비밀번호가 올바르지 않습니다.'; msg.className = 'pwd-msg err'; return;
+    }
+    if (nw.length < 4) {
+      msg.textContent = '새 비밀번호는 4자리 이상이어야 합니다.'; msg.className = 'pwd-msg err'; return;
+    }
+    if (nw !== nw2) {
+      msg.textContent = '새 비밀번호가 서로 일치하지 않습니다.'; msg.className = 'pwd-msg err'; return;
+    }
+    localStorage.setItem(PWD_KEY, nw);
+    msg.textContent = '비밀번호가 변경되었습니다!'; msg.className = 'pwd-msg ok';
+    setTimeout(closePwdModal, 1200);
   }
 
   function getUsers() {
