@@ -1265,8 +1265,15 @@
     if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{7,16}$/.test(pwd)) {
       alert(d['a-invalid']); return;
     }
+    const users = JSON.parse(localStorage.getItem('zetasum_users') || '[]');
+    users.push({ name, email, date: new Date().toISOString() });
+    localStorage.setItem('zetasum_users', JSON.stringify(users));
     alert(d['a-done']);
     closeModal();
+    document.getElementById('fname').value = '';
+    document.getElementById('femail').value = '';
+    document.getElementById('fpwd').value = '';
+    document.getElementById('fpwd2').value = '';
   }
   function handleGuest() { alert(T[currentLang]['a-guest']); closeModal(); }
 

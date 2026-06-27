@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZETASUM 관리자</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+  :root {
+    --bg:       #08080e;
+    --bg-card:  #0e0e1c;
+    --violet:   #7c3aed;
+    --violet-l: #a78bfa;
+    --cyan:     #22d3ee;
+    --gold:     #f59e0b;
+    --green:    #22c55e;
+    --red:      #ef4444;
+    --grad:     linear-gradient(135deg, #6d28d9 0%, #0891b2 100%);
+    --grad-text:linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%);
+    --text:     #f8fafc;
+    --muted:    #64748b;
+    --border:   rgba(255,255,255,0.07);
+    --font:     'Outfit', sans-serif;
+    --ease:     cubic-bezier(.4,0,.2,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: #07080f;
+    border: 1px solid rgba(124,58,237,.25);
+    border-radius: 26px; padding: 3rem 2.75rem;
+    width: 100%; max-width: 400px;
+    box-shadow: 0 40px 100px rgba(0,0,0,.7);
+    position: relative;
+  }
+  .login-box::before {
+    content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+    background: linear-gradient(90deg, #6d28d9, #0891b2);
+  }
+  .login-logo {
+    font-size: 1.6rem; font-weight: 900; letter-spacing: 3px;
+    background: var(--grad-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    display: block; text-align: center; margin-bottom: .4rem;
+  }
+  .login-sub {
+    text-align: center; font-size: .78rem; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 2rem;
+  }
+  .login-box label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: .45rem; letter-spacing: .5px; }
+  .login-box input {
+    width: 100%; background: rgba(124,58,237,.06);
+    border: 1px solid rgba(255,255,255,.09); color: var(--text);
+    padding: .9rem 1.1rem; border-radius: 12px;
+    font-family: var(--font); font-size: .9rem; outline: none;
+    transition: all .25s; margin-bottom: 1.25rem;
+  }
+  .login-box input:focus {
+    border-color: rgba(124,58,237,.55);
+    box-shadow: 0 0 0 3px rgba(124,58,237,.12);
+  }
+  .login-box input::placeholder { color: rgba(100,116,139,.5); }
+  .btn-login {
+    display: block; width: 100%; padding: .92rem;
+    background: var(--grad); color: #fff; border: none;
+    border-radius: 12px; font-size: .95rem; font-weight: 700;
+    font-family: var(--font); cursor: pointer;
+    box-shadow: 0 4px 24px rgba(109,40,217,.4);
+    transition: all .3s var(--ease);
+  }
+  .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(109,40,217,.55); }
+  .login-error {
+    color: #f87171; font-size: .8rem; text-align: center;
+    margin-top: .85rem; display: none;
+  }
+
+  /* ── ADMIN PANEL ── */
+  #adminPanel { display: none; }
+
+  header {
+    background: rgba(8,8,14,.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 3rem;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .admin-logo {
+    font-size: 1.3rem; font-weight: 900; letter-spacing: 3px;
+    background: var(--grad-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .admin-logo span {
+    font-size: .72rem; font-weight: 500; letter-spacing: 2px;
+    color: var(--muted); -webkit-text-fill-color: var(--muted);
+    margin-left: .75rem;
+  }
+  .btn-logout {
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    color: var(--muted); padding: .45rem 1.1rem; border-radius: 8px;
+    font-size: .8rem; font-family: var(--font); cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-logout:hover { color: var(--text); border-color: rgba(124,58,237,.35); }
+
+  .main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; }
+
+  /* ── STAT CARDS ── */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+  .s-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 1.75rem;
+    display: flex; align-items: center; gap: 1.25rem;
+  }
+  .s-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .s-icon.violet { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.2); }
+  .s-icon.cyan   { background: rgba(34,211,238,.1);  border: 1px solid rgba(34,211,238,.2); }
+  .s-icon.gold   { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.2); }
+  .s-val { font-size: 2rem; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+  .s-lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem; gap: 1rem; flex-wrap: wrap;
+  }
+  .toolbar-title { font-size: 1.05rem; font-weight: 700; }
+  .toolbar-right { display: flex; gap: .65rem; }
+  .btn-sm {
+    padding: .48rem 1rem; border-radius: 8px; font-size: .8rem;
+    font-weight: 600; font-family: var(--font); cursor: pointer;
+    border: none; transition: all .2s;
+  }
+  .btn-sm.export { background: rgba(34,211,238,.1); color: var(--cyan); border: 1px solid rgba(34,211,238,.2); }
+  .btn-sm.export:hover { background: rgba(34,211,238,.18); }
+  .btn-sm.danger { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
+  .btn-sm.danger:hover { background: rgba(239,68,68,.18); }
+  .search-wrap { position: relative; }
+  .search-wrap input {
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    color: var(--text); padding: .48rem 1rem .48rem 2.25rem;
+    border-radius: 8px; font-family: var(--font); font-size: .82rem;
+    outline: none; width: 220px; transition: border-color .2s;
+  }
+  .search-wrap input:focus { border-color: rgba(124,58,237,.4); }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-icon {
+    position: absolute; left: .75rem; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: .85rem;
+  }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 18px; overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  thead th {
+    padding: 1rem 1.25rem; text-align: left;
+    font-size: .7rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted);
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(124,58,237,.04); }
+  tbody td { padding: 1rem 1.25rem; font-size: .875rem; }
+  .td-num { color: var(--muted); font-size: .78rem; font-weight: 600; }
+  .td-name { font-weight: 600; }
+  .td-email { color: var(--muted); }
+  .td-date { color: var(--muted); font-size: .8rem; }
+  .badge-new {
+    display: inline-block; background: rgba(34,211,238,.12);
+    border: 1px solid rgba(34,211,238,.25); color: var(--cyan);
+    font-size: .6rem; font-weight: 700; letter-spacing: 1px;
+    padding: .1rem .45rem; border-radius: 100px; text-transform: uppercase;
+    margin-left: .5rem; vertical-align: middle;
+  }
+  .btn-del {
+    background: none; border: 1px solid rgba(239,68,68,.2);
+    color: #f87171; padding: .3rem .7rem; border-radius: 7px;
+    font-size: .75rem; font-family: var(--font); cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-del:hover { background: rgba(239,68,68,.12); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center; padding: 4rem 2rem; color: var(--muted);
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: .4; }
+  .empty p { font-size: .9rem; }
+
+  @media (max-width: 768px) {
+    header { padding: 1rem 1.5rem; }
+    .main { padding: 1.5rem 1rem; }
+    .stat-row { grid-template-columns: 1fr; }
+    .search-wrap input { width: 160px; }
+  }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <span class="login-logo">ZETASUM</span>
+    <p class="login-sub">관리자 로그인</p>
+    <label>관리자 비밀번호</label>
+    <input type="password" id="pwdInput" placeholder="비밀번호를 입력하세요" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">로그인</button>
+    <p class="login-error" id="loginErr">비밀번호가 올바르지 않습니다.</p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <header>
+    <div>
+      <span class="admin-logo">ZETASUM<span>ADMIN</span></span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">로그아웃</button>
+  </header>
+
+  <div class="main">
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="s-card">
+        <div class="s-icon violet">👥</div>
+        <div>
+          <div class="s-val" id="statTotal">0</div>
+          <div class="s-lbl">전체 가입자</div>
+        </div>
+      </div>
+      <div class="s-card">
+        <div class="s-icon cyan">📅</div>
+        <div>
+          <div class="s-val" id="statToday">0</div>
+          <div class="s-lbl">오늘 가입</div>
+        </div>
+      </div>
+      <div class="s-card">
+        <div class="s-icon gold">📧</div>
+        <div>
+          <div class="s-val" id="statDomains">0</div>
+          <div class="s-lbl">이메일 도메인 수</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <span class="toolbar-title">가입자 목록</span>
+      <div class="toolbar-right">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="이름 또는 이메일 검색" oninput="renderTable()">
+        </div>
+        <button class="btn-sm export" onclick="exportCSV()">CSV 내보내기</button>
+        <button class="btn-sm danger" onclick="clearAll()">전체 삭제</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>이름</th>
+            <th>이메일</th>
+            <th>가입일시</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ADMIN_PWD = 'zetasum2026';
+  const STORAGE_KEY = 'zetasum_users';
+
+  function doLogin() {
+    const v = document.getElementById('pwdInput').value;
+    if (v === ADMIN_PWD) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      renderAll();
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  }
+
+  function doLogout() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('loginErr').style.display = 'none';
+  }
+
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }
+
+  function renderAll() {
+    const users = getUsers();
+    const today = new Date().toDateString();
+    const todayCount = users.filter(u => new Date(u.date).toDateString() === today).length;
+    const domains = new Set(users.map(u => u.email.split('@')[1]).filter(Boolean));
+
+    document.getElementById('statTotal').textContent   = users.length;
+    document.getElementById('statToday').textContent   = todayCount;
+    document.getElementById('statDomains').textContent = domains.size;
+    renderTable();
+  }
+
+  function renderTable() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const users = getUsers();
+    const filtered = q
+      ? users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+      : users;
+
+    const tbody = document.getElementById('userTableBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5">
+        <div class="empty">
+          <div class="empty-icon">📭</div>
+          <p>${q ? '검색 결과가 없습니다.' : '아직 가입자가 없습니다.'}</p>
+        </div>
+      </td></tr>`;
+      return;
+    }
+
+    const today = new Date().toDateString();
+    tbody.innerHTML = filtered.slice().reverse().map((u, i) => {
+      const isNew = new Date(u.date).toDateString() === today;
+      const d = new Date(u.date);
+      const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const realIdx = users.length - 1 - i;
+      return `<tr>
+        <td class="td-num">${users.length - i}</td>
+        <td class="td-name">${esc(u.name)}${isNew ? '<span class="badge-new">NEW</span>' : ''}</td>
+        <td class="td-email">${esc(u.email)}</td>
+        <td class="td-date">${dateStr}</td>
+        <td><button class="btn-del" onclick="deleteUser(${realIdx})">삭제</button></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function deleteUser(idx) {
+    if (!confirm('이 가입자를 삭제할까요?')) return;
+    const users = getUsers();
+    users.splice(idx, 1);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+    renderAll();
+  }
+
+  function clearAll() {
+    if (!confirm('전체 가입자 데이터를 삭제할까요? 복구할 수 없습니다.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    renderAll();
+  }
+
+  function exportCSV() {
+    const users = getUsers();
+    if (!users.length) { alert('내보낼 데이터가 없습니다.'); return; }
+    const rows = [['번호', '이름', '이메일', '가입일시'],
+      ...users.map((u, i) => [i+1, u.name, u.email, new Date(u.date).toLocaleString('ko-KR')])
+    ];
+    const csv = '﻿' + rows.map(r => r.join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `zetasum_users_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>
