@@ -113,7 +113,7 @@
   .main { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem; }
 
   /* ── STAT CARDS ── */
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
   .s-card {
     background: var(--bg-card); border: 1px solid var(--border);
     border-radius: 18px; padding: 1.75rem;
@@ -127,6 +127,7 @@
   .s-icon.violet { background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.2); }
   .s-icon.cyan   { background: rgba(34,211,238,.1);  border: 1px solid rgba(34,211,238,.2); }
   .s-icon.gold   { background: rgba(245,158,11,.1);  border: 1px solid rgba(245,158,11,.2); }
+  .s-icon.red    { background: rgba(239,68,68,.1);   border: 1px solid rgba(239,68,68,.2); }
   .s-val { font-size: 2rem; font-weight: 900; letter-spacing: -1px; line-height: 1; }
   .s-lbl { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
 
@@ -197,6 +198,43 @@
     transition: all .2s;
   }
   .btn-del:hover { background: rgba(239,68,68,.12); }
+
+  /* ── ROLE BADGES ── */
+  .badge-admin {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+    color: var(--violet-l); font-size: .65rem; font-weight: 700;
+    letter-spacing: 1px; padding: .2rem .6rem; border-radius: 100px;
+    text-transform: uppercase;
+  }
+  .badge-member {
+    display: inline-flex; align-items: center;
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    color: var(--muted); font-size: .65rem; font-weight: 600;
+    letter-spacing: 1px; padding: .2rem .6rem; border-radius: 100px;
+    text-transform: uppercase;
+  }
+  .btn-promote {
+    background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.25);
+    color: var(--violet-l); padding: .28rem .65rem; border-radius: 7px;
+    font-size: .72rem; font-family: var(--font); cursor: pointer; transition: all .2s;
+  }
+  .btn-promote:hover { background: rgba(124,58,237,.22); }
+  .btn-demote {
+    background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.22);
+    color: var(--gold); padding: .28rem .65rem; border-radius: 7px;
+    font-size: .72rem; font-family: var(--font); cursor: pointer; transition: all .2s;
+  }
+  .btn-demote:hover { background: rgba(245,158,11,.16); }
+
+  /* ── ADMIN PAGE BADGE ── */
+  .admin-page-badge {
+    display: inline-flex; align-items: center;
+    background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.3);
+    color: var(--violet-l); font-size: .65rem; font-weight: 700;
+    letter-spacing: 2px; padding: .25rem .75rem; border-radius: 100px;
+    text-transform: uppercase; margin-left: .85rem;
+  }
 
   /* ── EMPTY STATE ── */
   .empty {
@@ -288,8 +326,9 @@
 <!-- ADMIN PANEL -->
 <div id="adminPanel">
   <header>
-    <div>
+    <div style="display:flex;align-items:center;">
       <span class="admin-logo">ZETASUM<span>ADMIN</span></span>
+      <span class="admin-page-badge">관리자 페이지</span>
     </div>
     <div style="display:flex;gap:.65rem;align-items:center;">
       <button class="btn-logout" onclick="openPwdModal()">🔑 비밀번호 변경</button>
@@ -340,6 +379,13 @@
           <div class="s-lbl">이메일 도메인 수</div>
         </div>
       </div>
+      <div class="s-card">
+        <div class="s-icon red">🛡️</div>
+        <div>
+          <div class="s-val" id="statAdmins">0</div>
+          <div class="s-lbl">관리자 계정</div>
+        </div>
+      </div>
     </div>
 
     <!-- TOOLBAR -->
@@ -363,6 +409,7 @@
             <th>#</th>
             <th>이름</th>
             <th>이메일</th>
+            <th>유형</th>
             <th>가입일시</th>
             <th></th>
           </tr>
@@ -440,10 +487,12 @@
     const today = new Date().toDateString();
     const todayCount = users.filter(u => new Date(u.date).toDateString() === today).length;
     const domains = new Set(users.map(u => u.email.split('@')[1]).filter(Boolean));
+    const adminCount = users.filter(u => u.role === 'admin').length;
 
     document.getElementById('statTotal').textContent   = users.length;
     document.getElementById('statToday').textContent   = todayCount;
     document.getElementById('statDomains').textContent = domains.size;
+    document.getElementById('statAdmins').textContent  = adminCount;
     renderTable();
   }
 
@@ -471,14 +520,37 @@
       const d = new Date(u.date);
       const dateStr = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       const realIdx = users.length - 1 - i;
+      const isAdmin = u.role === 'admin';
+      const roleBadge = isAdmin
+        ? '<span class="badge-admin">🛡️ 관리자 가입</span>'
+        : '<span class="badge-member">일반 가입</span>';
+      const roleBtn = isAdmin
+        ? `<button class="btn-demote" onclick="toggleRole(${realIdx})">관리자 해제</button>`
+        : `<button class="btn-promote" onclick="toggleRole(${realIdx})">관리자 지정</button>`;
       return `<tr>
         <td class="td-num">${users.length - i}</td>
         <td class="td-name">${esc(u.name)}${isNew ? '<span class="badge-new">NEW</span>' : ''}</td>
         <td class="td-email">${esc(u.email)}</td>
+        <td>${roleBadge}</td>
         <td class="td-date">${dateStr}</td>
-        <td><button class="btn-del" onclick="deleteUser(${realIdx})">삭제</button></td>
+        <td style="display:flex;gap:.4rem;align-items:center;">${roleBtn}<button class="btn-del" onclick="deleteUser(${realIdx})">삭제</button></td>
       </tr>`;
     }).join('');
+  }
+
+  function toggleRole(idx) {
+    const users = getUsers();
+    const u = users[idx];
+    const isAdmin = u.role === 'admin';
+    if (isAdmin) {
+      if (!confirm(`'${u.name}'의 관리자 권한을 해제할까요?`)) return;
+      users[idx].role = 'member';
+    } else {
+      if (!confirm(`'${u.name}'을(를) 관리자로 지정할까요?`)) return;
+      users[idx].role = 'admin';
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+    renderAll();
   }
 
   function deleteUser(idx) {
